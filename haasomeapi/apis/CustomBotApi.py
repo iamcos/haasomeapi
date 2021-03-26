@@ -289,11 +289,11 @@ class CustomBotApi(ApiBase):
         """
 
         response = super()._execute_request("/GetCustomBot", {"botGuid": botguid})
-
-
+        bot = self._convert_json_bot_to_custom_bot_object(response['Result'])
+        
         try:
             return HaasomeClientResponse(EnumErrorCode(int(response["ErrorCode"])),
-                                         response["ErrorMessage"], self._convert_json_bot_to_custom_bot_specific(bottype, response["Result"]))
+                                         response["ErrorMessage"], bot)
         except:
             return HaasomeClientResponse(EnumErrorCode(int(response["ErrorCode"])),
                                          response["ErrorMessage"], {})
@@ -357,7 +357,7 @@ class CustomBotApi(ApiBase):
                                                               "primaryCoin": primarycoin,
                                                               "secondaryCoin": secondarycoin,
                                                               "contractName": contractname})
-
+        # print(response['result'])
         try:
             return HaasomeClientResponse(EnumErrorCode(int(response["ErrorCode"])),
                                          response["ErrorMessage"], self._convert_json_bot_to_custom_bot_specific(bottype, response["Result"]))
@@ -515,8 +515,8 @@ class CustomBotApi(ApiBase):
             return HaasomeClientResponse(EnumErrorCode(int(response["ErrorCode"])),
                                          response["ErrorMessage"], {})
 
-    def clone_custom_bot(self, accountguid: str, botguid: str, bottype: EnumCustomBotType,botname: str,
-                         primarycoin: str,secondarycoin: str, contractname: str, leverage: float):
+    def clone_custom_bot(self, accountguid: str, botguid: str, bottype: EnumCustomBotType, botname: str,
+                         primarycoin: str, secondarycoin: str, contractname: str, leverage: float):
         """ Clone a custom bot
 
         :param accountguid: str: Account guid
@@ -532,17 +532,18 @@ class CustomBotApi(ApiBase):
         :returns: In .result any: Specified bot type object
         """
 
-        response = super()._execute_request("/CloneCustomBot",  {"botGuid": botguid,
-                                                                 "botName": botname,
-                                                                 "accountGuid": accountguid,
-                                                                 "primaryCoin": primarycoin,
-                                                                 "secondaryCoin": secondarycoin,
-                                                                 "contractName": contractname,
-                                                                 "leverage": float(str(leverage).replace(',', '.'))})
+        response = super()._execute_request("/CloneCustomBot", {"botGuid": botguid,
+                                                                "botName": botname,
+                                                                "accountGuid": accountguid,
+                                                                "primaryCoin": primarycoin,
+                                                                "secondaryCoin": secondarycoin,
+                                                                "contractName": contractname,
+                                                                "leverage": float(str(leverage).replace(',', '.'))})
 
         try:
             return HaasomeClientResponse(EnumErrorCode(int(response["ErrorCode"])),
-                                         response["ErrorMessage"], self._convert_json_bot_to_custom_bot_specific(bottype, response["Result"]))
+                                         response["ErrorMessage"],
+                                         self._convert_json_bot_to_custom_bot_specific(bottype, response["Result"]))
         except:
             return HaasomeClientResponse(EnumErrorCode(int(response["ErrorCode"])),
                                          response["ErrorMessage"], {})
@@ -558,13 +559,14 @@ class CustomBotApi(ApiBase):
         :returns: In .result :class:`~haasomeapi.dataobjects.custombots.BaseCustomBot`: BaseCustomBot of the bot that was backtested
         """
 
-        response = super()._execute_request("/CloneCustomBotSimple",  {"botGuid": botguid,
-                                                                 "botName": botname,
-                                                                 "accountGuid": accountguid})
+        response = super()._execute_request("/CloneCustomBotSimple", {"botGuid": botguid,
+                                                                      "botName": botname,
+                                                                      "accountGuid": accountguid})
 
         try:
             return HaasomeClientResponse(EnumErrorCode(int(response["ErrorCode"])),
-                                         response["ErrorMessage"], self._convert_json_bot_to_custom_bot_specific(EnumCustomBotType.BASE_CUSTOM_BOT, response["Result"]))
+                                         response["ErrorMessage"], self._convert_json_bot_to_custom_bot_specific(
+                    EnumCustomBotType.BASE_CUSTOM_BOT, response["Result"]))
         except:
             return HaasomeClientResponse(EnumErrorCode(int(response["ErrorCode"])),
                                          response["ErrorMessage"], {})
@@ -600,13 +602,13 @@ class CustomBotApi(ApiBase):
                                                                        "accountGuid": accountguid,
                                                                        "primaryCoin": primarycoin,
                                                                        "secondaryCoin": secondarycoin,
-                                                                       "stopType": EnumAccumulationBotStopType(stoptype).name.capitalize(),
+                                                                       "stopType": EnumAccumulationBotStopType(stoptype).value, #name.capitalize()
                                                                        "stopTypeValue": float(str(stoptypevalue).replace(',', '.')),
                                                                        "randomOrderSizeX": float(str(randomordersizex).replace(',', '.')),
                                                                        "randomOrderSizeY": float(str(randomordersizey).replace(',', '.')),
                                                                        "randomOrderTimeX": randomordertimex,
                                                                        "randomOrderTimeY": randomordertimey,
-                                                                       "direction": EnumOrderType(direction).name.capitalize(),
+                                                                       "direction": EnumOrderType(direction).value, #name.capitalize()
                                                                        "triggerOnPrice": str(triggeronprice).lower(),
                                                                        "triggerWhenHigher": str(triggerwhenhigher).lower(),
                                                                        "triggerValue": float(str(triggervalue).replace(',', '.'))})
@@ -793,7 +795,7 @@ class CustomBotApi(ApiBase):
                                                                      "percentageBoost": float(str(percentageboost).replace(',', '.')),
                                                                      "minPercentage": float(str(minpercentage).replace(',', '.')),
                                                                      "maxPercentage": float(str(maxpercentage).replace(',', '.')),
-                                                                     "amountType": EnumCurrencyType(amounttype).name.capitalize(),
+                                                                     "amountType": EnumCurrencyType(amounttype).value, #name.capitalize()
                                                                      "amountSpread": float(str(amountspread).replace(',', '.')),
                                                                      "buyAmount": float(str(buyamount).replace(',', '.')),
                                                                      "sellAmount":  float(str(sellamount).replace(',', '.')),
@@ -1300,7 +1302,7 @@ class CustomBotApi(ApiBase):
         """
 
         response = super()._execute_request("/MadHatterSetIndicatorParameter",  {"botGuid": botguid,
-                                                                                 "type": EnumMadHatterIndicators(type).name.capitalize(),
+                                                                                 "type": EnumMadHatterIndicators(type).value, #name.capitalize()
                                                                                  "fieldNo": fieldNo,
                                                                                  "value": value})
 
@@ -1376,8 +1378,8 @@ class CustomBotApi(ApiBase):
                                                                   "price": float(str(price).replace(',', '.')),
                                                                   "triggerPrice": float(str(triggerprice).replace(',', '.')),
                                                                   "orderTemplate": templateguid,
-                                                                  "orderType": EnumOrderType(direction).name.capitalize(),
-                                                                  "triggerType": EnumOrderBotTriggerType(triggertype).name.capitalize()})
+                                                                  "orderType": EnumOrderType(direction).value,
+                                                                  "triggerType": EnumOrderBotTriggerType(triggertype).value})
 
         try:
             return HaasomeClientResponse(EnumErrorCode(int(response["ErrorCode"])), response["ErrorMessage"],
@@ -1413,8 +1415,8 @@ class CustomBotApi(ApiBase):
                                                                    "price": float(str(price).replace(',', '.')),
                                                                    "triggerPrice": float(str(triggerprice).replace(',', '.')),
                                                                    "orderTemplate": templateguid,
-                                                                   "orderType": EnumOrderType(direction).name.capitalize(),
-                                                                   "triggerType": EnumOrderBotTriggerType(triggertype).name.capitalize()})
+                                                                   "orderType": EnumOrderType(direction).value,
+                                                                   "triggerType": EnumOrderBotTriggerType(triggertype).value})
 
         try:
             return HaasomeClientResponse(EnumErrorCode(int(response["ErrorCode"])), response["ErrorMessage"],
